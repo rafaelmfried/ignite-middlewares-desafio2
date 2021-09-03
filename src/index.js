@@ -23,6 +23,14 @@ function checksExistsUserAccount(request, response, next) {
 
 function checksCreateTodosUserAvailability(request, response, next) {
   // Complete aqui
+  const { user } = request;
+  return (
+    user.pro
+    ? next()
+    : (user.todos.length < 10
+      ? next()
+      : response.status(400).json({ error: "Usuario excedeu o numeros de todos permitidos para versao free!" }))
+  );
 }
 
 function checksTodoExists(request, response, next) {
