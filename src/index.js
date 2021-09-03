@@ -29,16 +29,33 @@ function checksCreateTodosUserAvailability(request, response, next) {
     ? next()
     : (user.todos.length < 10
       ? next()
-      : response.status(400).json({ error: "Usuario excedeu o numeros de todos permitidos para versao free!" }))
+      : response.status(403).json({ error: "Usuario excedeu o numeros de todos permitidos para versao free!" }))
   );
 }
 
 function checksTodoExists(request, response, next) {
   // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+  const validateUser = users.find((user) => user.username === username);
+  const validateUUID = validate(id);
+  if (validateUser && validateUUID) {
+    const todo = validateUser.todos.find((todo) => todo.id === id);
+    request.todo = todo;
+    return next();
+  }
+  return response.status(404).json({ error: "Erro na validacao do Usuario ou do Todo Id" }).send();
 }
 
 function findUserById(request, response, next) {
   // Complete aqui
+  const { id } = request.params;
+  const user = users.find((user) => user.id === id);
+  if (user) {
+    request.user = user;
+    return next();
+  }
+  return response.status(404).json({ error: 'Id de usuario n encontrado!' });
 }
 
 app.post('/users', (request, response) => {
