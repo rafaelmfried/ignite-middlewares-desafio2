@@ -17,7 +17,7 @@ function checksExistsUserAccount(request, response, next) {
   return (
     user
     ? next()
-    : response.status(404).json({ error: "Usuario Inexistente" }).send()
+    : response.status(404).json({ error: "Usuario Inexistente" })
   );
 }
 
@@ -39,12 +39,19 @@ function checksTodoExists(request, response, next) {
   const { id } = request.params;
   const validateUser = users.find((user) => user.username === username);
   const validateUUID = validate(id);
-  if (validateUser && validateUUID) {
-    const todo = validateUser.todos.find((todo) => todo.id === id);
-    request.todo = todo;
-    return next();
-  }
-  return response.status(404).json({ error: "Erro na validacao do Usuario ou do Todo Id" }).send();
+  if (!validateUUID)
+    return response.status(400).json({ error: "ID invalido!" })
+
+  if (!validateUser)
+    return response.status(404).json({ error: "Usuario invalido!" });
+
+  const todo = validateUser.todos.find((todo) => todo.id === id);
+  if (!todo)
+    return response.status(404).json({ error: "Todo inexistente!" });
+  
+  request.user = validateUser;
+  request.todo = todo;
+  return next();
 }
 
 function findUserById(request, response, next) {
